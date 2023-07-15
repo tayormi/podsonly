@@ -61,7 +61,8 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(
                       height: 20,
                     ),
-                    HomeCategory(title: 'Business', genre: 'Business'),
+                    HomeCategory(
+                        title: 'Relationships', genre: 'Relationships'),
                   ],
                 ),
               )

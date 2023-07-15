@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   podcast_search: ^0.6.1
+  dio: ^5.2.1+1
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:podcast_search/podcast_search.dart';
 import 'package:podsonly/core/services/podcast_service.dart';
+import 'package:podsonly/ui/temp_api_ui.dart';
 
 class HomeCategory extends StatelessWidget {
   const HomeCategory({super.key, required this.title, this.genre = ''});
@@ -23,7 +24,10 @@ class HomeCategory extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const TempAPIUI()));
+              },
               child: const Text('See All'),
             ),
           ],
