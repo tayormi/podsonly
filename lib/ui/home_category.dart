@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:podcast_search/podcast_search.dart';
 import 'package:podsonly/core/services/podcast_service.dart';
+import 'package:podsonly/ui/podcast_details.dart';
 import 'package:podsonly/ui/temp_api_ui.dart';
 
 class HomeCategory extends StatelessWidget {
@@ -45,9 +46,21 @@ class HomeCategory extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     final items = snapshot.data?.items;
                     final item = items?[index];
-                    return Image.network(
-                      item?.artworkUrl600 ?? '',
-                      fit: BoxFit.cover,
+                    return GestureDetector(
+                      onTap: () {
+                        if (item == null) return;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => PodcastDetails(
+                              item: item,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Image.network(
+                        item?.artworkUrl600 ?? '',
+                        fit: BoxFit.cover,
+                      ),
                     );
                   },
                   separatorBuilder: (BuildContext context, int index) {

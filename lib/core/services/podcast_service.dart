@@ -7,4 +7,9 @@ class PodcastService {
         await search.charts(country: Country.nigeria, limit: 10, genre: genre);
     return results;
   }
+
+  Future<Podcast> getPodcastDetails(String feedUrl) async {
+    final podcast = await Podcast.loadFeed(url: feedUrl);
+    return podcast;
+  }
 }

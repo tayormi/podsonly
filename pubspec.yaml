@@ -11,6 +11,9 @@ dependencies:
     sdk: flutter
   podcast_search: ^0.6.1
   dio: ^5.2.1+1
+  rich_readmore: ^1.0.5
+  intl: ^0.18.1
+  just_audio: ^0.9.34
 
 dev_dependencies:
   flutter_test:
