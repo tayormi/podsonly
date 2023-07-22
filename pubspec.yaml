@@ -14,6 +14,8 @@ dependencies:
   rich_readmore: ^1.0.5
   intl: ^0.18.1
   just_audio: ^0.9.34
+  html: ^0.15.4
+  just_audio_background: ^0.0.1-beta.10
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:podcast_search/podcast_search.dart';
 import 'package:rich_readmore/rich_readmore.dart';
 
@@ -86,7 +88,7 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
             height: 20,
           ),
           RichReadMoreText.fromString(
-            text: widget.podcast.description ?? '',
+            text: parseHtml(widget.podcast.description ?? ''),
             textStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
@@ -123,9 +125,7 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Image.network(
-                        episode.imageUrl ??
-                            widget.podcast.image ??
-                            'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg',
+                        getEpisodeImageUrl(episode),
                         loadingBuilder: (BuildContext context, Widget child,
                             ImageChunkEvent? loadingProgress) {
                           if (loadingProgress == null) {
@@ -146,7 +146,7 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
                         ),
                       ),
                       subtitle: Text(
-                        episode.description,
+                        parseHtml(episode.description),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -166,6 +166,18 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
                             return;
                           }
                           _player.setUrl(episode.contentUrl!);
+                          final audioSource = AudioSource.uri(
+                            Uri.parse(episode.contentUrl ?? ''),
+                            tag: MediaItem(
+                              // Specify a unique ID for each media item:
+                              id: Key(episode.guid).toString(),
+                              // Metadata to display in the notification:
+                              album: widget.podcast.title,
+                              title: episode.title,
+                              artUri: Uri.parse(getEpisodeImageUrl(episode)),
+                            ),
+                          );
+                          _player.setAudioSource(audioSource);
                           _player.play();
                         },
                         icon: currentEpisodeIndex == index
@@ -197,4 +209,16 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
       ),
     );
   }
+
+  String getEpisodeImageUrl(Episode episode) {
+    return episode.imageUrl ??
+        widget.podcast.image ??
+        'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg';
+  }
+}
+
+String parseHtml(String htmlString) {
+  final document = parse(htmlString);
+  final String parsedString = parse(document.body!.text).documentElement!.text;
+  return parsedString;
 }
