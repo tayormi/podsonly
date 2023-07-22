@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:podcast_search/podcast_search.dart';
+import 'package:podsonly/ui/providers/audio_player_provider.dart';
+import 'package:podsonly/ui/providers/hello_world_provider.dart';
 import 'package:rich_readmore/rich_readmore.dart';
 
-class PodcastDetailsBody extends StatefulWidget {
+class PodcastDetailsBody extends ConsumerStatefulWidget {
   const PodcastDetailsBody({
     super.key,
     required this.podcast,
@@ -17,27 +20,26 @@ class PodcastDetailsBody extends StatefulWidget {
   final Item item;
 
   @override
-  State<PodcastDetailsBody> createState() => _PodcastDetailsBodyState();
+  ConsumerState<PodcastDetailsBody> createState() => _PodcastDetailsBodyState();
 }
 
-class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
-  late AudioPlayer _player;
+class _PodcastDetailsBodyState extends ConsumerState<PodcastDetailsBody> {
   int currentEpisodeIndex = -1;
 
   @override
   void initState() {
     super.initState();
-    _player = AudioPlayer();
   }
 
   @override
   void dispose() {
-    _player.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final helloWorld = ref.watch(helloWorldProvider);
+    final audioPlayer = ref.read(audioPlayerProvider);
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -86,6 +88,13 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
           ]),
           const SizedBox(
             height: 20,
+          ),
+          Text(
+            helloWorld,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
           ),
           RichReadMoreText.fromString(
             text: parseHtml(widget.podcast.description ?? ''),
@@ -160,12 +169,13 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
                           setState(() {
                             currentEpisodeIndex = index;
                           });
-                          if (currentEpisodeIndex == index && _player.playing) {
-                            _player.pause();
+                          if (currentEpisodeIndex == index &&
+                              audioPlayer.playing) {
+                            audioPlayer.pause();
                             currentEpisodeIndex = -1;
                             return;
                           }
-                          _player.setUrl(episode.contentUrl!);
+                          audioPlayer.setUrl(episode.contentUrl!);
                           final audioSource = AudioSource.uri(
                             Uri.parse(episode.contentUrl ?? ''),
                             tag: MediaItem(
@@ -177,8 +187,8 @@ class _PodcastDetailsBodyState extends State<PodcastDetailsBody> {
                               artUri: Uri.parse(getEpisodeImageUrl(episode)),
                             ),
                           );
-                          _player.setAudioSource(audioSource);
-                          _player.play();
+                          audioPlayer.setAudioSource(audioSource);
+                          audioPlayer.play();
                         },
                         icon: currentEpisodeIndex == index
                             ? const Icon(Icons.pause)

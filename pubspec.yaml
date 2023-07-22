@@ -16,6 +16,7 @@ dependencies:
   just_audio: ^0.9.34
   html: ^0.15.4
   just_audio_background: ^0.0.1-beta.10
+  flutter_riverpod: ^2.3.6
 
 dev_dependencies:
   flutter_test:

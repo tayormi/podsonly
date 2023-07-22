@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:podcast_search/podcast_search.dart';
-import 'package:podsonly/core/services/podcast_service.dart';
 import 'package:podsonly/ui/podcast_details.dart';
+import 'package:podsonly/ui/providers/podcast_provider.dart';
 import 'package:podsonly/ui/temp_api_ui.dart';
 
-class HomeCategory extends StatelessWidget {
+class HomeCategory extends ConsumerWidget {
   const HomeCategory({super.key, required this.title, this.genre = ''});
 
   final String title;
   final String genre;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final podcastItems = ref.watch(podcastCategoryItemProvider(genre));
     return Column(
       children: [
         Row(
@@ -33,52 +35,45 @@ class HomeCategory extends StatelessWidget {
             ),
           ],
         ),
-        FutureBuilder<SearchResult>(
-          future: PodcastService().fetchPodcast(genre: genre),
-          builder:
-              (BuildContext context, AsyncSnapshot<SearchResult> snapshot) {
-            if (snapshot.hasData) {
-              return SizedBox(
-                height: 100,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: snapshot.data?.resultCount ?? 0,
-                  itemBuilder: (BuildContext context, int index) {
-                    final items = snapshot.data?.items;
-                    final item = items?[index];
-                    return GestureDetector(
-                      onTap: () {
-                        if (item == null) return;
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => PodcastDetails(
-                              item: item,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Image.network(
-                        item?.artworkUrl600 ?? '',
-                        fit: BoxFit.cover,
+        podcastItems.when(data: (SearchResult data) {
+          return SizedBox(
+            height: 100,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: data.resultCount,
+              itemBuilder: (BuildContext context, int index) {
+                final items = data.items;
+                final item = items[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PodcastDetails(
+                          item: item,
+                        ),
                       ),
                     );
                   },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const SizedBox(
-                      width: 10,
-                    );
-                  },
-                ),
-              );
-            }
-            if (snapshot.hasError) {
-              return const Center(child: Text('Opps! Something went wrong'));
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-        ),
+                  child: Image.network(
+                    item.artworkUrl600 ?? '',
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const SizedBox(
+                  width: 10,
+                );
+              },
+            ),
+          );
+        }, error: (Object error, StackTrace stackTrace) {
+          return const Center(child: Text('Opps! Something went wrong'));
+        }, loading: () {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        })
       ],
     );
   }
